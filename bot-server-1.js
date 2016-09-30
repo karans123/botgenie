@@ -54,6 +54,7 @@ const actions = {
         return new Promise(function(resolve, reject) {
             const value = firstEntityValue(entities, "place");
             context.place = value;
+            console.log(context);
             /*if(entities) {
                 for (var key in entities) {
                     if (entities.hasOwnProperty(key)) {
