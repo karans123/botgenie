@@ -36,6 +36,7 @@ const actions = {
     }
     return Promise.resolve();
   },
+
   cancelOrder({context, entities}) {
     //console.log("------ Cancellation Function Called ! ---------");
     //console.log("Order No : " ,JSON.stringify(entities));
@@ -69,6 +70,7 @@ const actions = {
     }
     return Promise.resolve();
   },
+
   getOrderStatus({context, entities}) {
     //console.log("------ Order Status Function Called ! ---------");
     //console.log("Order No : " ,JSON.stringify(entities));
@@ -99,6 +101,7 @@ const actions = {
     }
     return Promise.resolve();
   },
+
   validatePhone({context, entities}) {
       var regex = /^\d{10}$/;
       if (regex.test(entities["phone_number"][0]["value"])) {
@@ -109,6 +112,7 @@ const actions = {
         botData = "Please enter a valid phone number !!<br/>";
       }
   },
+
     getEligibleOrders({context, entities}) {
     //console.log("------ Order Status Function Called ! ---------");
     //console.log("Order No : " ,JSON.stringify(entities));
@@ -193,7 +197,7 @@ function clientRequest(url, method, request) {
         data: request,
         headers: { "Content-Type": "application/json" }
     };
-     
+
     client.post(url, args, function (data, response) {
         data["statusCode"] = response.statusCode;
         //console.log(data);
