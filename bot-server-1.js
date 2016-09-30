@@ -52,8 +52,8 @@ const actions = {
     merge({context, entities}) {
         console.log(entities);
         return new Promise(function(resolve, reject) {
-            const value = firstEntityValue(entities, "location");
-            context.location = value;
+            const value = firstEntityValue(entities, "place");
+            context.place = value;
             /*if(entities) {
                 for (var key in entities) {
                     if (entities.hasOwnProperty(key)) {
