@@ -211,12 +211,15 @@ function clientRequest(url, method, request) {
 
 const client = new Wit({accessToken, actions});
 
-var app = require('express')();
+var express = require('express');
+var app = express();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
 app.get('/', function(req, res){
   res.sendFile(__dirname + '/index.html');
 });
+
+app.use(express.static(__dirname + '/images'));
 
 io.on('connection', function(socket){
   socket.on('chat message', function(msg){
@@ -225,8 +228,8 @@ io.on('connection', function(socket){
     client.runActions("", msg, {})
     .then((data) => {
       //console.log(data);
+      io.emit('chat message', botData);
     })
-    setTimeout(function(){io.emit('chat message', botData)},5000);
   });
 });
 
