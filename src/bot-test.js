@@ -77,53 +77,79 @@ const actions = {
   cancelOrder({context, entities}) {
     //console.log("------ Cancellation Function Called ! ---------");
     //console.log("Order No : " ,JSON.stringify(entities));
-    console.log("Processing your order for cancellation...");
-    var orderId = entities["order_id"][0]["value"];
-    var request =  {
-      "initiated_by": "BotGenie",
-      "payment_method": "source",
-      "reason_detail": "",
-      "reason_id": 156,
-      "source": "BotGenie"
-    };
-    res = "";
-    res = clientRequest("http://test-athena.lenskart.com:8041/"+orderId+"/cancel-invoice","POST",request);
-    setTimeout(function(){
-      if(res!="" && res.statusCode >=200 && res.statusCode<=300 ) {
-        console.log(res.message);
-      } else {
-        console.log("Order cancellation failed... Please try after some time !!");
-      }
-    },1000);
+    try {
+          console.log("Processing your order for cancellation...");
+          var orderId = context["order_id"][0]["value"];
+          var paymentMethod = entities["method"][0]["value"];
+          var request =  {
+            "initiated_by": "Bot Batola",
+            "payment_method": paymentMethod,
+            "reason_detail": "",
+            "reason_id": 156,
+            "source": "Bot Batola"
+          };
+          res = "";
+          res = clientRequest("http://test-athena.lenskart.com:8041/"+orderId+"/cancel-invoice","POST",request);
+          setTimeout(function(){
+            if(res!="" && res.statusCode >=200 && res.statusCode<=300 ) {
+              console.log(res.message);
+            } else {
+              console.log("Order cancellation failed... Please try after some time !!");
+            }
+          },1000);
+    } catch(e) {
+      console.log("Order cancellation failed... Please try after some time !!");
+    }
     return Promise.resolve();
   },
   getOrderStatus({context, entities}) {
     //console.log("------ Order Status Function Called ! ---------");
     //console.log("Order No : " ,JSON.stringify(entities));
     //console.log("Processing your order Information...");
-    var orderId = entities["order_id"][0]["value"];
-    var request =  {
-                      "normalSearchData": {
-                                            "searchOrderParam": orderId        
-                                          }
-                    }
-    res = "";
-    res = clientRequest("http://test-athena.lenskart.com:8765/api/v2/order/search/order?start=0&rows=100","POST",request);
-    setTimeout(function(){
-      if(res.statusCode >=200 && res.statusCode<=300 && res.numFound > 0 ) {
-        //console.log("Order Information : ");
-        //console.log("Order State : " + res["orderList"][0]["state"][0]);
-        console.log("Your order current status  is " + res["orderList"][0]["status"][0]);
-      } else {
-        console.log("No data found for order number " + orderId + ", Please verify your order number again !!");
-      }
-    },1000);
+    try {
+        var orderId = entities["order_id"][0]["value"];
+        var request =  {
+                          "normalSearchData": {
+                                                "searchOrderParam": orderId
+                                              }
+                        }
+        res = "";
+        res = clientRequest("http://test-athena.lenskart.com:8765/api/v2/order/search/order?start=0&rows=100","POST",request);
+        setTimeout(function(){
+          if(res!="" && res.statusCode >=200 && res.statusCode<=300 && res.numFound > 0 ) {
+            //console.log("Order Information : ");
+            //console.log("Order State : " + res["orderList"][0]["state"][0]);
+            console.log("Your order current status  is " + res["orderList"][0]["status"][0]);
+          } else {
+            console.log("No data found for order number " + orderId + ", Please verify your order number again !!");
+          }
+        },1000);
+    } catch(e) {
+      console.log("Some error occured ... Please try after some time !!");
+    }
     return Promise.resolve();
   },
   getDeliveryEstimate({context, entities}) {
     //console.log("------ Delivery Estimate Function Called ! ---------");
     //console.log("Order No : " ,JSON.stringify(entities));
-    var orderId = entities["order_id"][0]["value"];
+    try {
+        var orderId = entities["order_id"][0]["value"];
+        res = "";
+        res = clientRequest("http://athena.lenskart.com:9090/shipping/estimate/"+orderId,"GET","");
+        setTimeout(function(){
+          if(res!="" && res.statusCode >=200 && res.statusCode<=300 ) {
+            console.log("Your estimated date of delivery is " + res["delivery_date"] + " and it will be dispatched by " + res["dispatch_date"]);
+          } else {
+            if( res!="" && res.statusCode == 404 )
+              console.log(res.error_message);
+            else
+              console.log("Some error occured ... Please try after some time !!");
+          }
+        },2000);
+    } catch(e) {
+      console.log("Some error occured ... Please try after some time !!");
+    }
+    return Promise.resolve();
 
   }
 };
@@ -133,6 +159,7 @@ function clientRequest(url, method, request) {
     var client = new Client();
 
     client.get(url, function (data, response) {
+        data["statusCode"] = response.statusCode;
         //console.log(data);
         //console.log(response);
         res = data;
