@@ -25,6 +25,17 @@ const accessToken = (() => {
 return process.argv[2];
 })();
 
+const firstEntityValue = (entities, entity) => {
+    const val = entities && entities[entity] &&
+            Array.isArray(entities[entity]) &&
+            entities[entity].length > 0 &&
+            entities[entity][0].value
+        ;
+    if (!val) {
+        return null;
+    }
+    return typeof val === 'object' ? val.value : val;
+};
 
 const actions = {
     send(request, response) {
@@ -38,6 +49,23 @@ const actions = {
         return Promise.resolve();
     },
 
+    merge({context, entities}) {
+        console.log(entities);
+        return new Promise(function(resolve, reject) {
+            for (var key in entities) {
+                if (entities.hasOwnProperty(key)) {
+                    const value = firstEntityValue(entities, key);
+                    if (value) {
+                        console.log(key + ' ' + value);
+                        context.key = value;
+                    }
+                }
+            }
+
+
+            return resolve(context);
+        });
+    },
     cancelOrder({context, entities}) {
         //console.log("------ Cancellation Function Called ! ---------");
         //console.log("Order No : " ,JSON.stringify(entities));
@@ -227,8 +255,10 @@ io.on('connection', function(socket){
         botData = "";
         client.runActions("", msg, {})
             .then((data) => {
+            //console.log(context);
+            //botData=botData+context+"<br/>";
             io.emit('chat message', botData);
-        })
+        });
 
     });
 });
