@@ -56,6 +56,8 @@ const actions = {
   send(request, response) {
     //console.log('sending...', JSON.stringify(response));
     console.log(response.text);
+    if( response.quickreplies!= undefined )
+      console.log(response.quickreplies);
     return Promise.resolve();
   },
   merge({entities, context, message, sessionId}) {
@@ -145,7 +147,7 @@ const actions = {
             else
               console.log("Some error occured ... Please try after some time !!");
           }
-        },2000);
+        },1000);
     } catch(e) {
       console.log("Some error occured ... Please try after some time !!");
     }
