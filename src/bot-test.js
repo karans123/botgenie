@@ -23,34 +23,6 @@ const accessToken = (() => {
   return process.argv[2];
 })();
 
-// Joke example
-// See https://wit.ai/patapizza/example-joke
-
-const allJokes = {
-  chuck: [
-    'Chuck Norris counted to infinity - twice.',
-    'Death once had a near-Chuck Norris experience.',
-  ],
-  tech: [
-    'Did you hear about the two antennas that got married? The ceremony was long and boring, but the reception was great!',
-    'Why do geeks mistake Halloween and Christmas? Because Oct 31 === Dec 25.',
-  ],
-  default: [
-    'Why was the Math book sad? Because it had so many problems.',
-  ],
-};
-
-const firstEntityValue = (entities, entity) => {
-  const val = entities && entities[entity] &&
-    Array.isArray(entities[entity]) &&
-    entities[entity].length > 0 &&
-    entities[entity][0].value
-  ;
-  if (!val) {
-    return null;
-  }
-  return typeof val === 'object' ? val.value : val;
-};
 
 const actions = {
   send(request, response) {
@@ -59,22 +31,6 @@ const actions = {
     if( response.quickreplies!= undefined )
       console.log(response.quickreplies);
     return Promise.resolve();
-  },
-  merge({entities, context, message, sessionId}) {
-    return new Promise(function(resolve, reject) {
-      delete context.joke;
-      const category = firstEntityValue(entities, 'category');
-      if (category) {
-        context.cat = category;
-      }
-      const sentiment = firstEntityValue(entities, 'sentiment');
-      if (sentiment) {
-        context.ack = sentiment === 'positive' ? 'Glad you liked it.' : 'Hmm.';
-      } else {
-        delete context.ack;
-      }
-      return resolve(context);
-    });
   },
   cancelOrder({context, entities}) {
     //console.log("------ Cancellation Function Called ! ---------");
