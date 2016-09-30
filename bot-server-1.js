@@ -25,6 +25,8 @@ const accessToken = (() => {
 return process.argv[2];
 })();
 
+const sessions = {};
+
 const firstEntityValue = (entities, entity) => {
     const val = entities && entities[entity] &&
             Array.isArray(entities[entity]) &&
@@ -39,35 +41,55 @@ const firstEntityValue = (entities, entity) => {
 
 const actions = {
     send(request, response) {
-        //console.log('sending...', JSON.stringify(response));
+        const {sessionId, context, entities} = request;
+        const {text, quickreplies} = response;
+        console.log("request" + JSON.stringify(request));
+        return new Promise(function(resolve, reject) {
+            console.log('sending...', JSON.stringify(response));
+            return resolve();
+        });
+        /*//console.log('sending...', JSON.stringify(response));
         console.log(response.text);
         botData = botData + response.text + "<br/>";
         if( response.quickreplies!= undefined ) {
             console.log(response.quickreplies);
             botData = botData + response.quickreplies + "<br/>";
         }
-        return Promise.resolve();
+        return Promise.resolve();*/
     },
 
     merge({context, entities}) {
-        console.log(entities);
+        //console.log(entities);
         return new Promise(function(resolve, reject) {
-            const value = firstEntityValue(entities, "place");
-            context.place = value;
-            console.log(context);
-            /*if(entities) {
+
+            if(entities) {
                 for (var key in entities) {
                     if (entities.hasOwnProperty(key)) {
+
                         const value = firstEntityValue(entities, key);
+                        console.log("---" + key  + value);
                         if (value) {
-                            console.log(key + ' ' + value);
-                            context.key = value;
+                            if(key == "email") {
+                                context.email = value;
+                            } else if(key == "hto_booking") {
+                                context.hto_booking = value;
+                            } else if(key == "mobile") {
+                                context.mobile = value;
+                            } else if(key == 'customer_address') {
+                                context.customer_address = value;
+                            }
+
+                            //console.log(key + ' ' + value);
+
                         }
                     }
                 }
-                console.log("context" + context);
+                console.log(context);
+                for(var key in context) {
+                    console.log(key + " " + firstEntityValue(context, key));
+                }
+
             }
-*/
             return resolve(context);
         });
     },
@@ -267,9 +289,20 @@ io.on('connection', function(socket){
 
     });
 });
+
+io.on('login', function (data) {
+    connected = true;
+    // Display the welcome message
+    var message = "Welcome to Socket.IO Chat – ";
+    var sessionId = new Date().toISOString();
+    sessions[sessionId] = {context: {}};
+    io.emit('logged_in', {session_id:sessionId});
+});
+
 function sendMessageToClient(user, msg) {
     io.emit('chat message', msg);
 }
-http.listen(3000, function(){
+/*http.listen(3000, function(){
     console.log('listening on localhost:3000');
-});
+});*/
+interactive(client);
