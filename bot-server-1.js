@@ -52,7 +52,9 @@ const actions = {
     merge({context, entities}) {
         console.log(entities);
         return new Promise(function(resolve, reject) {
-            if(entities) {
+            const value = firstEntityValue(entities, "location");
+            context.location = value;
+            /*if(entities) {
                 for (var key in entities) {
                     if (entities.hasOwnProperty(key)) {
                         const value = firstEntityValue(entities, key);
@@ -64,7 +66,7 @@ const actions = {
                 }
                 console.log("context" + context);
             }
-
+*/
             return resolve(context);
         });
     },
