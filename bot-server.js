@@ -3,8 +3,8 @@
 let Wit = null;
 let interactive = null;
 var Client = require('node-rest-client').Client;
-var res = "";
 var botData = "";
+var httpClient = new Client();
 
 try {
   // if running from repo
@@ -53,17 +53,20 @@ const actions = {
             "reason_id": 156,
             "source": "Bot Batola"
           };
-          res = "";
-          res = clientRequest("http://test-athena.lenskart.com:8041/"+orderId+"/cancel-invoice","POST",request);
-          setTimeout(function(){
-            if(res!="" && res.statusCode >=200 && res.statusCode<=300 ) {
-              console.log(res.message);
-              botData = res.message+"<br/>";
+          var args = {
+            data: request,
+            headers: { "Content-Type": "application/json" }
+          };
+          httpClient.post("http://test-athena.lenskart.com:8041/"+orderId+"/cancel-invoice", args, function (data, response) {
+            data["statusCode"] = response.statusCode;
+            if(data!="" && data.statusCode >=200 && data.statusCode<=300 ) {
+              console.log(data.message);
+              botData = data.message+"<br/>";
             } else {
               console.log("Order cancellation failed... Please try after some time !!");
               botData = "Order cancellation failed... Please try after some time !!<br/>";
             }
-          },1000);
+          });
     } catch(e) {
       console.log("Order cancellation failed... Please try after some time !!");
       botData = "Order cancellation failed... Please try after some time !!<br/>";
@@ -82,19 +85,20 @@ const actions = {
                                                 "searchOrderParam": orderId
                                               }
                         }
-        res = "";
-        res = clientRequest("http://test-athena.lenskart.com:8765/api/v2/order/search/order?start=0&rows=100","POST",request);
-        setTimeout(function(){
-          if(res!="" && res.statusCode >=200 && res.statusCode<=300 && res.numFound > 0 ) {
-            //console.log("Order Information : ");
-            //console.log("Order State : " + res["orderList"][0]["state"][0]);
-            console.log("Your order current status  is " + res["orderList"][0]["status"][0]);
-            botData = "Your order current status  is " + res["orderList"][0]["status"][0]+"<br/>";
-          } else {
-            console.log("No data found for order number " + orderId + ", Please verify your order number again !!");
-            botData = "No data found for order number " + orderId + ", Please verify your order number again !!<br/>";
-          }
-        },1000);
+        var args = {
+          data: request,
+          headers: { "Content-Type": "application/json" }
+        };
+        httpClient.post("http://test-athena.lenskart.com:8765/api/v2/order/search/order?start=0&rows=100", args, function (data, response) {
+            data["statusCode"] = response.statusCode;
+            if(data!="" && data.statusCode >=200 && data.statusCode<=300 && data.numFound > 0 ) {
+              console.log("Your order current status  is " + data["orderList"][0]["status"][0]);
+              botData = "Your order current status  is " + data["orderList"][0]["status"][0]+"<br/>";
+            } else {
+              console.log("No data found for order number " + orderId + ", Please verify your order number again !!");
+              botData = "No data found for order number " + orderId + ", Please verify your order number again !!<br/>";
+            }
+        });
     } catch(e) {
       console.log("Some error occured ... Please try after some time !!");
       botData = "Some error occured ... Please try after some time !!<br/>";
@@ -114,9 +118,6 @@ const actions = {
   },
 
     getEligibleOrders({context, entities}) {
-    //console.log("------ Order Status Function Called ! ---------");
-    //console.log("Order No : " ,JSON.stringify(entities));
-    //console.log("Processing your order Information...");
     try {
         var phone = entities["phone_number"][0]["value"];
         var request =  {
@@ -124,60 +125,64 @@ const actions = {
                                                 "telephone": phone
                                               }
                         }
-        res = "";
-        res = clientRequest("http://test-athena.lenskart.com:8765/api/v2/order/search/order?start=0&rows=100","POST",request);
-        setTimeout(function(){
-          if(res!="" && res.statusCode >=200 && res.statusCode<=300 && res.numFound > 0 ) {
-            //console.log("Order Information : ");
-            //console.log("Order State : " + res["orderList"][0]["state"][0]);
-            console.log("Latest orders are " + phone + " :- ");
-            botData = "Latest orders are " + phone + " :- <br/>";
-            var i =0;
-            var str= [];
-            for (i = 0; i < 5; i++) {
-              str.push(res["orderList"][i]["increment_id"]);
+        var args = {
+        data: request,
+          headers: { "Content-Type": "application/json" }
+        };
+        httpClient.post("http://test-athena.lenskart.com:8765/api/v2/order/search/order?start=0&rows=100", args, function (data, response) {
+            data["statusCode"] = response.statusCode;
+            //console.log(data);
+            //console.log(response);
+            if(data!="" && data.statusCode >=200 && data.statusCode<=300 && data.numFound > 0 ) {
+              console.log("Latest orders are " + phone + " :- ");
+              botData = "Latest orders are " + phone + " :- <br/>";
+              var i =0;
+              var str= [];
+              for (i = 0; i < 5; i++) {
+                str.push(data["orderList"][i]["increment_id"]);
+              }
+              console.log(str.join(", ") + "....");
+              botData = botData + str.join(", ") + "....<br/>";
+            } else {
+              console.log("No data found for phone no " + phone + ", Please verify your phone number again !!");
+              botData = "No data found for phone no " + phone + ", Please verify your phone number again !!<br/>";
             }
-            console.log(str.join(", ") + "....");
-            botData = botData + str.join(", ") + "....<br/>";
-          } else {
-            console.log("No data found for phone no " + phone + ", Please verify your phone number again !!");
-            botData = "No data found for phone no " + phone + ", Please verify your phone number again !!<br/>";
-          }
-        },1000);
+        });
     } catch(e) {
       console.log("Some error occured ... Please try after some time !!");
       botData = "Some error occured ... Please try after some time !!<br/>";
     }
     return Promise.resolve();
   },
-  getDeliveryEstimate({context, entities}) {
-    //console.log("------ Delivery Estimate Function Called ! ---------");
-    //console.log("Order No : " ,JSON.stringify(entities));
-    try {
-        var orderId = entities["order_id"][0]["value"];
-        res = "";
-        res = clientRequest("http://athena.lenskart.com:9090/shipping/estimate/"+orderId,"GET","");
-        setTimeout(function(){
-          if(res!="" && res.statusCode >=200 && res.statusCode<=300 ) {
-            console.log("Your estimated date of delivery is " + res["delivery_date"] + " and it will be dispatched by " + res["dispatch_date"]);
-            botData = "Your estimated date of delivery is " + res["delivery_date"] + " and it will be dispatched by " + res["dispatch_date"]+"<br/>";
-          } else {
-            if( res!="" && res.statusCode == 404 ) {
-              console.log(res.error_message);
-              botData = res.error_message + "<br/>";
-            } else {
-              console.log("Some error occured ... Please try after some time !!");
-              botData = "Some error occured ... Please try after some time !!<br/>";
-            }
-          }
-        },1000);
-    } catch(e) {
-      console.log("Some error occured ... Please try after some time !!");
-      botData = "Some error occured ... Please try after some time !!<br/>";
-    }
-    return Promise.resolve();
+  deliveryEstimate({context, entities}) {
+        //console.log("------ Delivery Estimate Function Called ! ---------");
+        //console.log("Order No : " ,JSON.stringify(entities));
+        try {
+            var orderId = entities["order_id"][0]["value"];
+            httpClient.get("http://athena.lenskart.com:9090/shipping/estimate/" + orderId, function (data, response) {
+                //console.log(response);
+                data["statusCode"] = response.statusCode;
 
-  }
+                if(data !="" && data.statusCode >=200 && data.statusCode<=300 ) {
+                    console.log("Your estimated date of delivery is " + data["delivery_date"] + " and it will be dispatched by " + data["dispatch_date"]);
+                    botData = "Your estimated date of delivery is " + data["delivery_date"] + " and it will be dispatched by " + data["dispatch_date"]+"<br/>";
+                } else {
+                    if( data!="" && data.statusCode == 404 ) {
+                        console.log(data.error_message);
+                        botData = data.error_message + "<br/>";
+                    } else {
+                        console.log("Some error occured ... Please try after some time !!");
+                        botData = "Some error occured ... Please try after some time !!<br/>";
+                    }
+                }
+            });
+        } catch(e) {
+            console.log("Some error occured ... Please try after some time !!");
+            botData = "Some error occured ... Please try after some time !!<br/>";
+        }
+        return Promise.resolve();
+
+    }
 };
 
 function clientRequest(url, method, request) {
@@ -188,7 +193,6 @@ function clientRequest(url, method, request) {
         data["statusCode"] = response.statusCode;
         //console.log(data);
         //console.log(response);
-        res = data;
         return data;
     });
   } else if( method == "POST" ) {
@@ -202,7 +206,6 @@ function clientRequest(url, method, request) {
         data["statusCode"] = response.statusCode;
         //console.log(data);
         //console.log(response);
-        res = data;
         return data;
     });
   }
@@ -211,12 +214,15 @@ function clientRequest(url, method, request) {
 
 const client = new Wit({accessToken, actions});
 
-var app = require('express')();
+var express = require('express');
+var app = express();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
 app.get('/', function(req, res){
   res.sendFile(__dirname + '/index.html');
 });
+
+app.use(express.static(__dirname + '/images'));
 
 io.on('connection', function(socket){
   socket.on('chat message', function(msg){
@@ -225,8 +231,8 @@ io.on('connection', function(socket){
     client.runActions("", msg, {})
     .then((data) => {
       //console.log(data);
+      io.emit('chat message', botData);
     })
-    setTimeout(function(){io.emit('chat message', botData)},5000);
   });
 });
 
