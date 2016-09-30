@@ -17,7 +17,7 @@ try {
 
 const accessToken = (() => {
   if (process.argv.length !== 3) {
-    console.log('usage: node examples/joke.js <wit-access-token>');
+    console.log('usage: node src/bot-test.js <wit-access-token>');
     process.exit(1);
   }
   return process.argv[2];
@@ -80,6 +80,47 @@ const actions = {
             console.log("Your order current status  is " + res["orderList"][0]["status"][0]);
           } else {
             console.log("No data found for order number " + orderId + ", Please verify your order number again !!");
+          }
+        },1000);
+    } catch(e) {
+      console.log("Some error occured ... Please try after some time !!");
+    }
+    return Promise.resolve();
+  },
+  validatePhone({context, entities}) {
+      var regex = /^\d{10}$/;
+      if (regex.test(entities["phone_number"][0]["value"])) {
+        console.log("phone number is valid");
+      } else {
+        console.log("Please enter a valid phone number !!");
+      }
+  },
+    getEligibleOrders({context, entities}) {
+    //console.log("------ Order Status Function Called ! ---------");
+    //console.log("Order No : " ,JSON.stringify(entities));
+    //console.log("Processing your order Information...");
+    try {
+        var phone = entities["phone_number"][0]["value"];
+        var request =  {
+                          "advancedSearchData": {
+                                                "telephone": phone
+                                              }
+                        }
+        res = "";
+        res = clientRequest("http://test-athena.lenskart.com:8765/api/v2/order/search/order?start=0&rows=100","POST",request);
+        setTimeout(function(){
+          if(res!="" && res.statusCode >=200 && res.statusCode<=300 && res.numFound > 0 ) {
+            //console.log("Order Information : ");
+            //console.log("Order State : " + res["orderList"][0]["state"][0]);
+            console.log("Latest orders are " + phone + " :- ");
+            var i =0;
+            var str= [];
+            for (i = 0; i < 5; i++) {
+              str.push(res["orderList"][i]["increment_id"]);
+            }
+            console.log(str.join(", ") + "....");
+          } else {
+            console.log("No data found for phone no " + phone + ", Please verify your phone number again !!");
           }
         },1000);
     } catch(e) {
