@@ -62,6 +62,7 @@ const actions = {
                         }
                     }
                 }
+                console.log("context" + context);
             }
 
             return resolve(context);
