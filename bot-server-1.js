@@ -52,16 +52,17 @@ const actions = {
     merge({context, entities}) {
         console.log(entities);
         return new Promise(function(resolve, reject) {
-            for (var key in entities) {
-                if (entities.hasOwnProperty(key)) {
-                    const value = firstEntityValue(entities, key);
-                    if (value) {
-                        console.log(key + ' ' + value);
-                        context.key = value;
+            if(entities) {
+                for (var key in entities) {
+                    if (entities.hasOwnProperty(key)) {
+                        const value = firstEntityValue(entities, key);
+                        if (value) {
+                            console.log(key + ' ' + value);
+                            context.key = value;
+                        }
                     }
                 }
             }
-
 
             return resolve(context);
         });
