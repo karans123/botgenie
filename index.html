@@ -175,6 +175,10 @@ p { margin: 0; }
 </head>
 <script type="text/javascript">
 
+  function setMessage(value) {
+    $('#btn-input').val(value);
+  }
+
   function openLiveChatHeader () {
     $('.chat').slideToggle(300, 'swing');
     $('.chat-message-counter').fadeToggle(300, 'swing');
@@ -200,7 +204,7 @@ p { margin: 0; }
       socket.on('chat message', function(msg){
         i++;
         $('.chat-feedback').hide();
-        $('#chat-id').append('<div  id="chat-list-'+i+'" class="chat-message clearfix"><img src="/bot-de-telegram.jpg" alt="" width="32" height="32"><div class="chat-message-content clearfix"><span class="chat-time"></span><h5>Bõtola</h5> <p>'+msg+'</p> </div></div><hr>');
+        $('#chat-id').append('<div  id="chat-list-'+i+'" class="chat-message clearfix"><img src="/bot-de-telegram.jpg" alt="" width="32" height="32"><div class="chat-message-content clearfix"><span class="chat-time"></span><h5>BotGenie</h5> <p>'+msg+'</p> </div></div><hr>');
         var list =  document.getElementById('chat-list-'+i);
         list.scrollIntoView();
       });
@@ -209,13 +213,13 @@ p { margin: 0; }
 <body>
   <div id="live-chat">
     <header class="clearfix" onclick="openLiveChatHeader()">
-      <h4>Bõtola</h4>
+      <h4>BotGenie</h4>
       <span class="chat-message-counter">1</span>
     </header>
 
     <div class="chat">
       <div id="chat-id" class="chat-history">
-        <div  id="chat-list-0" class="chat-message clearfix"><img src="/bot-de-telegram.jpg" alt="" width="32" height="32"/><div class="chat-message-content clearfix"><span class="chat-time"></span><h5>Bõtola</h5> <p>Hey, This is Bõtola, How may I help you?</p> </div></div><hr>
+        <div  id="chat-list-0" class="chat-message clearfix"><img src="/bot-de-telegram.jpg" alt="" width="32" height="32"/><div class="chat-message-content clearfix"><span class="chat-time"></span><h5>BotGenie</h5> <p>Hey, This is BotGenie, How may I help you?</p> </div></div><hr>
       </div>
       <div align="center">
        <img class="chat-feedback" src="/hex-loader2.gif" alt="" width="40" height="40"/>
