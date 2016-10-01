@@ -44,7 +44,13 @@ const actions = {
         const {text, quickreplies} = response;
         console.log("request" + JSON.stringify(request));
         return new Promise(function(resolve, reject) {
-            console.log('sending...', JSON.stringify(response));
+            //console.log('sending...', JSON.stringify(response));
+            console.log(response.text);
+            botData = botData + response.text + "<br/>";
+            if( response.quickreplies!= undefined ) {
+                console.log(response.quickreplies);
+                botData = botData + response.quickreplies + "<br/>";
+            }
             return resolve();
         });
         /*//console.log('sending...', JSON.stringify(response));
@@ -321,7 +327,7 @@ io.on('login', function (data) {
 function sendMessageToClient(user, msg) {
     io.emit('chat message', msg);
 }
-/*http.listen(3000, function(){
+http.listen(3000, function(){
     console.log('listening on localhost:3000');
-});*/
-interactive(client);
+});
+//interactive(client);
