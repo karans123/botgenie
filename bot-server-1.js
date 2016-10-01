@@ -76,7 +76,18 @@ const actions = {
                                 context.mobile = value;
                             } else if(key == 'customer_address') {
                                 context.customer_address = value;
+                            } else if(key == 'order_cancel') {
+                                context.order_cancel = value;
+                            } else if(key == 'order_id') {
+                                context.order_id = value;
+                            } else if(key == 'refund_method') {
+                                context.refund_method = value;
+                            } else if(key == 'order_status') {
+                                context.order_status = value;
+                            } else if(key == 'shipping_estimate') {
+                                context.shipping_estimate = value;
                             }
+
 
                             //console.log(key + ' ' + value);
 
@@ -93,21 +104,22 @@ const actions = {
         });
     },
 
-  cancelOrder({context, entities}) {
+  cancelOrder(obj) {
     //console.log("------ Cancellation Function Called ! ---------");
     //console.log("Order No : " ,JSON.stringify(entities));
     try {
           //console.log(context);
           //console.log(entities);
           console.log("Processing your order for cancellation...");
-          var orderId = entities["order_id"][0]["value"];
+          var orderId = obj.context.order_id;
+          console.log(JSON.stringify(obj.context));
           //var paymentMethod = entities["method"][0]["value"];
           var request =  {
-            "initiated_by": "Bot Batola",
-            "payment_method": "source",
+            "initiated_by": "BotGinie",
+            "payment_method": obj.context.refund_method,
             "reason_detail": "",
             "reason_id": 156,
-            "source": "Bot Batola"
+            "source": "BotGinie"
           };
           var args = {
             data: request,
@@ -130,12 +142,12 @@ const actions = {
     return Promise.resolve();
   },
 
-  getOrderStatus({context, entities}) {
+  getOrderStatus(obj) {
     //console.log("------ Order Status Function Called ! ---------");
     //console.log("Order No : " ,JSON.stringify(entities));
     //console.log("Processing your order Information...");
     try {
-        var orderId = entities["order_id"][0]["value"];
+        var orderId = obj.context.order_id;
         var request =  {
                           "normalSearchData": {
                                                 "searchOrderParam": orderId
@@ -173,9 +185,11 @@ const actions = {
       }
   },
 
-    getEligibleOrders({context, entities}) {
+    getEligibleOrders(obj) {
     try {
-        var phone = entities["phone_number"][0]["value"];
+        console.log(JSON.stringify(obj.context));
+
+        var phone = obj.context.mobile;
         var request =  {
                           "advancedSearchData": {
                                                 "telephone": phone
@@ -210,11 +224,11 @@ const actions = {
     }
     return Promise.resolve();
   },
-  deliveryEstimate({context, entities}) {
+  deliveryEstimate(obj) {
         //console.log("------ Delivery Estimate Function Called ! ---------");
         //console.log("Order No : " ,JSON.stringify(entities));
         try {
-            var orderId = entities["order_id"][0]["value"];
+            var orderId = obj.context.order_id;
             httpClient.get("http://athena.lenskart.com:9090/shipping/estimate/" + orderId, function (data, response) {
                 //console.log(response);
                 data["statusCode"] = response.statusCode;
